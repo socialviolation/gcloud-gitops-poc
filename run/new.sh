@@ -4,11 +4,15 @@ set -e
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="$SCRIPT_PATH/.."
-TF_PATH="$BASEPATH/infra"
 
+# PROJECT_ID=$(gcloud config get-value project)
 DEFAULT_REGION=australia-southeast1
 DEFAULT_ZONE=australia-southeast1-b
-PROJECT_APIS=(cloudbuild.googleapis.com compute.googleapis.com sourcerepo.googleapis.com)
+PROJECT_APIS=(
+    cloudbuild.googleapis.com 
+    compute.googleapis.com 
+    sourcerepo.googleapis.com
+)
 
 source "${SCRIPT_PATH}/lib.sh"
 
@@ -59,7 +63,6 @@ project_create_basic() {
     gcloud projects add-iam-policy-binding ${PROJECT_ID} \
         --member serviceAccount:$CLOUDBUILD_SA --role roles/editor
 }
-
 
 make_project_source() {
     REPO_NAME=${PROJECT_ID}-tf
@@ -134,7 +137,4 @@ project_create_organisation() {
     exit 1
 }
 
-# select_billing
-# project_create_basic
-PROJECT_ID=$(gcloud config get-value project)
-make_project_source
+project_create_basic
