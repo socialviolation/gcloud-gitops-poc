@@ -63,7 +63,6 @@ function select_org {
 
 function select_billing {
 # billing array: [{id,display-name}]
-  echo "hey there"
   GQ_BILLING_RAW=$(gcloud beta billing accounts list --format="csv[no-heading](name,displayName.sub(' ', '-'))")
   local BILLING_ARRAY=$GQ_BILLING_RAW
   local BILLING_COUNT="${#BILLING_ARRAY[@]}"

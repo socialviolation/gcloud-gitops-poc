@@ -40,9 +40,6 @@ project_create_basic() {
     gcloud projects create "$PROJECT_ID" \
         --name="$PROJECT_NAME" \
         --set-as-default
-    
-    gcloud compute project-info add-metadata \
-        --metadata google-compute-default-region=${DEFAULT_REGION},google-compute-default-zone=${DEFAULT_ZONE}
 
     select_billing
 
@@ -51,6 +48,8 @@ project_create_basic() {
 
     echo "Enabling APIs"
     gcloud services enable ${PROJECT_APIS[@]}
+    gcloud compute project-info add-metadata \
+        --metadata google-compute-default-region=${DEFAULT_REGION},google-compute-default-zone=${DEFAULT_ZONE}
 
     echo "Creating bucket for tf state"
     gsutil mb -c standard -l ${DEFAULT_REGION} \
@@ -61,6 +60,8 @@ project_create_basic() {
     CLOUDBUILD_SA="$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumber)')@cloudbuild.gserviceaccount.com"
     gcloud projects add-iam-policy-binding ${PROJECT_ID} \
         --member serviceAccount:$CLOUDBUILD_SA --role roles/editor
+
+    make_project_source
 }
 
 make_project_source() {
