@@ -55,10 +55,8 @@ project_create_basic() {
 
     gsutil versioning set on gs://${PROJECT_ID}-tfstate
 
-    
-
-    CLOUDBUILD_SA="$(gcloud projects describe $PROJECT_ID --format 'value(projectNumber)')@cloudbuild.gserviceaccount.com"
-    gcloud projects add-iam-policy-binding $PROJECT_ID \
+    CLOUDBUILD_SA="$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumber)')@cloudbuild.gserviceaccount.com"
+    gcloud projects add-iam-policy-binding ${PROJECT_ID} \
         --member serviceAccount:$CLOUDBUILD_SA --role roles/editor
 }
 
@@ -76,7 +74,9 @@ make_project_source() {
     then
         mkdir -p ${REPO_DIR}
         mkdir -p ${REPO_DIR}/modules
-        cp -a ${BASEPATH}/templates/tf-cloudbuild-gitops/modules ${REPO_DIR}/modules
+        cp -a ${BASEPATH}/templates/tf-cloudbuild-gitops/modules/* ${REPO_DIR}/modules/
+        cp ${BASEPATH}/templates/tf-cloudbuild-gitops/cloudbuild.yaml ${REPO_DIR}
+        cp ${BASEPATH}/templates/tf-cloudbuild-gitops/.gitignore ${REPO_DIR}
     fi
 
     {
@@ -85,15 +85,18 @@ make_project_source() {
         git config credential.helper gcloud.sh
         git add .
         git commit -am "Initial commit - adding modules"
-    }
-    generate_environment
-
-    {
-        cd ${REPO_DIR}
         git remote add google \
             https://source.developers.google.com/p/${PROJECT_ID}/r/${REPO_NAME}
         git push --all google
+
+        gcloud beta builds triggers create cloud-source-repositories \
+            --repo=${REPO_NAME} \
+            --description="Automated Infrastructure builder for ${REPO_NAME}" \
+            --branch-pattern=.* \
+            --build-config=cloudbuild.yaml
     }
+
+    generate_environment
 }
 
 generate_environment() {
@@ -122,6 +125,7 @@ generate_environment() {
         git init
         git add .
         git commit -am "Generated Environment: ${PROJECT_ENV}"
+        git push --all google
     }
 }
 
