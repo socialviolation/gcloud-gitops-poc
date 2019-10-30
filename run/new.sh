@@ -20,7 +20,6 @@ gen_id() {
     echo "$1-$((1 + RANDOM % 900000))" | tr '[:upper:]' '[:lower:]' | sed -e 's/ /-/g'
 }
 
-
 project_create_basic() {
     echo -n "Enter name for project: "
     read -r PROJECT_NAME
@@ -67,9 +66,6 @@ project_create_basic() {
 make_project_source() {
     REPO_NAME=${PROJECT_ID}-tf
     REPO_DIR=${BASEPATH}/cloud-source/${REPO_NAME}
-
-    echo "repo name: ${REPO_NAME}"
-    echo "repo dir: ${REPO_DIR}"
 
     gcloud source repos create ${REPO_NAME}
     
